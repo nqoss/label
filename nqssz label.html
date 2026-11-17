@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>nqssz label</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Inter:wght@400;600&display=swap">
+<style>
+:root{--bg:#f2f2f2;--panel:#fff;--ink:#0a0a0a;--mute:#666;--line:#d4d4d4;--accent:#0a0a0a;--accent-ink:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a0a0a;--panel:#161a1c;--ink:#f4f4f4;--mute:#9aa3a8;--line:#2b3236;--accent:#fff;--accent-ink:#0a0a0a}}
+:root[data-theme="dark"]{--bg:#0a0a0a;--panel:#161a1c;--ink:#f4f4f4;--mute:#9aa3a8;--line:#2b3236;--accent:#fff;--accent-ink:#0a0a0a}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.4 Inter,system-ui,sans-serif}
+.wrap{max-width:560px;margin:0 auto;padding:20px 16px 40px;display:grid;gap:20px}
+h1{font:italic 28px/1 "Russo One",Impact,sans-serif;transform:skewX(-8deg);margin:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+label{display:block;font-size:13px;color:var(--mute);margin-bottom:4px}
+input{width:100%;font:600 24px Inter,sans-serif;letter-spacing:.06em;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:6px;padding:12px}
+input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.actions{display:flex;gap:10px;margin-top:14px}
+button{flex:1;font:600 15px Inter,sans-serif;padding:12px;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.preview{display:flex;flex-direction:column;align-items:center;gap:10px;overflow-x:auto}
+.note{font-size:12px;color:var(--mute);margin:0}
+
+#label{width:100mm;height:150mm;background:#fff;color:#000;border:2px solid #000;display:flex;flex-direction:column;font-family:Inter,Arial,sans-serif;flex:none}
+#label .top{background:#000;color:#fff;padding:8mm 6mm;text-align:center}
+#label .brand{font:italic 44pt/1 "Russo One",Impact,sans-serif;transform:skewX(-8deg);letter-spacing:.02em}
+#label .mid{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6mm;text-align:center;gap:4mm}
+#label .k{font-size:9pt;font-weight:600}
+#label .code{font-size:34pt;font-weight:700;letter-spacing:.04em;word-break:break-all;line-height:1.1}
+#label .bar{padding:0 6mm 5mm;text-align:center}
+#label .bar svg{width:100%;height:26mm}
+#label .inside{border-top:2px solid #000;padding:3mm 6mm;text-align:center}
+#label .itemtxt{font-size:15pt;font-weight:600;line-height:1.25;word-break:break-word}
+#label .foot{border-top:2px solid #000;padding:3mm 6mm;font-size:9pt;text-align:center}
+
+@page{size:100mm 150mm;margin:0}
+@media print{
+ body{background:#fff}
+ .wrap{display:block;padding:0;max-width:none}
+ .panel,h1,.note{display:none!important}
+ :root{padding:0}
+ .preview{display:block;overflow:visible}
+ #label{border:0;margin:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <h1>nqssz</h1>
+ <div class="panel">
+  <label for="code">Order code</label>
+  <input id="code" autocomplete="off" autocapitalize="characters" placeholder="e.g. NQ-0042">
+  <label for="item" style="margin-top:12px">What's inside</label>
+  <input id="item" autocomplete="off" style="font-size:18px;letter-spacing:0" placeholder="e.g. Black hoodie, size M">
+  <div class="actions">
+   <button id="print">Print label</button>
+   <button id="next" class="ghost">Next code</button>
+  </div>
+ </div>
+ <div class="preview">
+  <div id="label" aria-label="Label preview">
+   <div class="top"><div class="brand">nqssz</div></div>
+   <div class="mid"><div class="k">ORDER</div><div class="code" id="oCode">-</div></div>
+   <div class="bar"><svg id="barcode"></svg></div>
+   <div class="inside"><div class="k">INSIDE</div><div class="itemtxt" id="oItem">-</div></div>
+   <div class="foot" id="oDate"></div>
+  </div>
+  <p class="note">Print at 100 x 150 mm (4 x 6 in), margins none.</p>
+ </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
+<script>
+(function(){
+ var $=function(id){return document.getElementById(id)};
+ var KEY='nqssz-last-code';
+ try{$('code').value=localStorage.getItem(KEY)||'NQ-0001'}catch(e){$('code').value='NQ-0001'}
+ function render(){
+  var c=$('code').value.trim();
+  $('oCode').textContent=c||'-';
+  $('oItem').textContent=$('item').value.trim()||'-';
+  $('oDate').textContent=new Date().toLocaleDateString('en-GB');
+  try{localStorage.setItem(KEY,c)}catch(e){}
+  try{JsBarcode('#barcode',c||' ',{format:'CODE128',displayValue:false,height:80,margin:0,width:3,background:'#fff',lineColor:'#000'})}catch(e){}
+ }
+ $('code').addEventListener('input',render);
+ $('item').addEventListener('input',render);
+ $('print').addEventListener('click',function(){window.print()});
+ $('next').addEventListener('click',function(){
+  var m=$('code').value.trim().match(/^(.*?)(\d+)$/);
+  if(m){var n=String(parseInt(m[2],10)+1);while(n.length<m[2].length)n='0'+n;$('code').value=m[1]+n}
+  $('item').value='';render();
+ });
+ render();
+})();
+</script>
+</body>
+</html>
